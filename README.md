@@ -10,3 +10,5 @@ import numpy as np
 from os import chdir, listdir
 
 You should also have an excel file with the Names and Codes from the stock. The information is taken from the website: https://www.infomoney.com.br/minhas-financas/confira-o-cnpj-das-acoes-negociadas-em-bolsa-e-saiba-como-declarar-no-imposto-de-renda/
+
+This Excel is in this repository with the name "Empresas_Listadas.xlsx"
