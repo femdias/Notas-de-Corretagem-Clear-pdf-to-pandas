@@ -12,6 +12,7 @@ import numpy as np
 from os import chdir, listdir
 
 #List taken from https://www.infomoney.com.br/minhas-financas/confira-o-cnpj-das-acoes-negociadas-em-bolsa-e-saiba-como-declarar-no-imposto-de-renda/
+# and http://www.b3.com.br/pt_br/produtos-e-servicos/negociacao/renda-variavel/etf/renda-variavel/etfs-listados/
 Lista_empresas = pd.read_excel(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Empresas_Listadas.xlsx')
 
 def pdf_to_pandas_clear(path):
@@ -40,10 +41,11 @@ def pdf_to_pandas_clear(path):
     for i in notas_path:
         path_pdf = r'{}\{}'.format(path, i)
         
+        
     
         #Using the lib camelot to select tables in a pdf 
         tables = camelot.read_pdf(path_pdf, flavor='stream', table_areas = ['0,600,600,400'],
-                                  columns=['91,105,167,193,305,345,402,445,543'])
+                                  columns=['91,105,167,180,305,345,402,445,543'])
         
         #Selecting the second table
         notas_de_corretagem = tables[0].df
@@ -136,6 +138,7 @@ def pdf_to_pandas_clear(path):
         on_pn = 0
         nome = 0
         codigo = []
+        tipo = []
         for i in np.arange(len(notas_de_corretagem4)):
             y = notas_de_corretagem4.loc[notas_de_corretagem4.index[i], 'Especificação do título']
             w = y.split('          ')
@@ -146,29 +149,43 @@ def pdf_to_pandas_clear(path):
             on_pn = w[1]
             
             cod = ''
+            tipo_papel = ''
             for j in np.arange(len(Lista_empresas)):
                 if nome == Lista_empresas['Nome de Pregão'][j]:
                     cod = str(Lista_empresas['Código'][j])[:4]
-                    if "ON " in on_pn:
+                    if "ON" in on_pn:
                         cod = f'{cod}{3}'
-                    if "PN " in on_pn:
-                        cod = f'{cod}{4}'
-                    if "PNA " in on_pn:
+                        tipo_papel = 'Ação'
+                    elif "PNA" in on_pn:
                         cod = f'{cod}{5}'
-                    if "PNB " in on_pn:
+                        tipo_papel = 'Ação'
+                    elif "PNB" in on_pn:
                         cod = f'{cod}{6}'
-                    if "PNC " in on_pn:
+                        tipo_papel = 'Ação'
+                    elif "PNC" in on_pn:
                         cod = f'{cod}{7}'
-                    if "PND " in on_pn:
+                        tipo_papel = 'Ação'
+                    elif "PND" in on_pn:
                         cod = f'{cod}{8}'
-                    if "UNT " in on_pn:
+                        tipo_papel = 'Ação'
+                    elif "UNT " in on_pn:
                         cod = f'{cod}{11}'
+                        tipo_papel = 'Ação'
+                    elif "PN" in on_pn:
+                        cod = f'{cod}{4}'
+                        tipo_papel = 'Ação'
+                    elif "CI" in on_pn:
+                        cod = f'{cod}{11}'
+                        tipo_papel = 'ETF'
                         
             if cod == '':
                 cod = on_pn
+                tipo_papel = 'FII'
             codigo.append(cod)
+            tipo.append(tipo_papel)
         
         notas_de_corretagem4['Código'] = codigo
+        notas_de_corretagem4['Tipo Papel'] = tipo
 
         notas = pd.concat([notas,notas_de_corretagem4]).reset_index(drop=True)
         
@@ -181,75 +198,10 @@ def pdf_to_pandas_clear(path):
 
 
 
-path = r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear'
+path = r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Roseli'
 notas = pdf_to_pandas_clear(path)
 
 
+notas.to_excel(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Roseli\Notas_Corretagem_Roseli.xlsx')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#essa função permite o python mexer com o sistema operacional
-from os import chdir, listdir
-'''
-chdir define o caminho principal que o python vai usar
-
-listdir lista todos os arquivos presentes em um caminho
-'''
-
-arquivos_path = listdir(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear')
-notas_path = []
-for i in range(len(arquivos_path)):
-               if 'NotaNegociacao' in arquivos_path[i]:
-                   notas_path.append(arquivos_path[i])
-
-
-
-notas = pd.DataFrame()
-for i in notas_path:
-    path =  r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\{}'.format(i)
-    x = pdf_to_pandas_clear(path)
-    notas = pd.concat([notas,x]).reset_index(drop=True)
-
-print(notas)
-
-notas.to_excel(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\notas.xlsx')
-
-notas['Valor'].sum()
-
-
-path = r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\NotaNegociacao_572220_20190812.pdf'
-pdf_to_pandas_clear(path)
 
