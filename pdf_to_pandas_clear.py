@@ -47,6 +47,17 @@ def pdf_to_pandas_clear(path):
         tables = camelot.read_pdf(path_pdf, flavor='stream', table_areas = ['0,600,600,400'],
                                   columns=['91,105,167,180,305,345,402,445,543'])
         
+          
+        ######## IF ERROR "EOF marker not found":
+            #That's a strange error that usually happens with Clear pdf's
+            #It's caused because the pdf had an error in the making of it.
+            #####SOLVING ######
+            #I normally open the pdf file and make a little edit:
+            #For example, I open the pdf using Microsoft Edge, because there it is possible
+            #To write with your mouse. So I make a little dot in the top of the pdf.
+            #That way, the pdf is saved properly, with a good format (with EOF marker)
+        
+        
         #Selecting the second table
         notas_de_corretagem = tables[0].df
         
@@ -198,10 +209,10 @@ def pdf_to_pandas_clear(path):
 
 
 
-path = r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Roseli'
+path = r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Felipe'
 notas = pdf_to_pandas_clear(path)
 
 
-notas.to_excel(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Roseli\Notas_Corretagem_Roseli.xlsx')
+notas.to_excel(r'C:\Users\femdi\OneDrive\Documentos\Python\PyCharm\Leitor_de_nota_de_corretagem_clear\Felipe\Notas_Corretagem_Felipe.xlsx')
 
 
