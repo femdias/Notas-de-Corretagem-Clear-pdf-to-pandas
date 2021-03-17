@@ -12,6 +12,7 @@ from datetime import datetime
 import os
 from os import listdir
 import pikepdf
+import numpy as np
 
 path  = "/home/fm/Documents/GitHub/em_desenvolvimento/Notas-de-Corretagem-Clear-pdf-to-pandas"
 
@@ -123,14 +124,14 @@ def treat(notas_de_corretagem, tables1):
         
         return notas_de_corretagem
     
-def etl(path):
+def ets(path):
     
     df = []
     
     arquivos_path = listdir(path)
     
     #filter files that contain the string "NotaCorretagem" in filename
-    notas_path = [os.path.join(path, file) for file in arquivos_path if 'NotaNegociacao' in file]
+    notas_path = [os.path.join(path, file) for file in arquivos_path if 'NotaNegociacao' in file and False==file.endswith('_resaved.pdf')]
     
     for path_pdf in notas_path:
         #Extract data from pdf
@@ -138,10 +139,38 @@ def etl(path):
         
         #Format extracted data        
         notas_de_corretagem = treat(notas_de_corretagem, tables1)
-       
+        
+        #register basefile
+        notas_de_corretagem['file'] = path_pdf
+        
         #store results
         df.append(notas_de_corretagem)
         
     return pd.concat(df)
 
-df = etl(path)
+#Agrouped pdfs in pandas df
+df = ets(path)
+
+def calculate_results(df):    
+    df_ = df.set_index(['Especificação do título', 'Data Pregao']).sort_index()
+    df_['Signal'] = df_['Compra/Venda'].map({'C':-1,'V':1})
+    df_['Value'] = df_['Signal'] * df_['Valor Operação / Ajuste']
+    df_.reset_index(inplace = True)
+    df_['Value_acum'] = np.nan
+    
+    
+    for i,r in df_.groupby('Especificação do título'):
+        
+        df_.loc[r.index,'Value_acum'] = r['Value'].cumsum()
+    
+    cols = ['Especificação do título', 'Data Pregao',
+           'Compra/Venda', 'D/C', 'Códigos Papel',
+           'Value_acum']
+    
+    df_2 = df_[cols].groupby('Especificação do título').max()
+    
+    df_2.Value_acum.sum()
+    return df_2
+
+df_results = calculate_results(df)
+
