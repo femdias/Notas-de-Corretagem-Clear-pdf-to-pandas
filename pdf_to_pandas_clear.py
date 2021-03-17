@@ -44,6 +44,7 @@ def extract(path_pdf):
     return notas_de_corretagem, tables1     
 
 def id_patterns(notas_de_corretagem):
+    #All patterns have the same treatment, but for debugs sake they are classified
     pattern1 = ['Q Negociação',
                  '',
                  'C/V Tipo mercado',
