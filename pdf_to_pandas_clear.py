@@ -43,33 +43,78 @@ def extract(path_pdf):
     tables1 = camelot.read_pdf(path_pdf, flavor='stream')
     return notas_de_corretagem, tables1     
 
+def id_patterns(notas_de_corretagem):
+    pattern1 = ['Q Negociação',
+                 '',
+                 'C/V Tipo mercado',
+                 'Prazo',
+                 'Especificação do título',
+                 'Obs. (*)\nQuantidade',
+                 '',
+                 'Preço / Ajuste',
+                 'Valor Operação / Ajuste',
+                 'D/C']
+    
+    pattern2 = ['Q Negociação',
+                 'C/V Tipo mercado',
+                 '',
+                 'Prazo',
+                 'Especificação do título',
+                 'Obs. (*)',
+                 'Quantidade',
+                 'Preço / Ajuste',
+                 'Valor Operação / Ajuste',
+                 'D/C']
+    
+    pattern3 = ['Q Negociação',
+                 '',
+                 'C/V Tipo mercado',
+                 'Prazo',
+                 'Especificação do título',
+                 'Obs. (*)',
+                 'Quantidade',
+                 'Preço / Ajuste',
+                 'Valor Operação / Ajuste',
+                 'D/C']
+    
+    pattern = notas_de_corretagem.loc[0].to_list()
+    
+    
+    #Excluding the first row (now it is the header) and reseting the index
+    notas_de_corretagem = notas_de_corretagem.iloc[1:,:].copy()
+    
+    if pattern == pattern1 or pattern == pattern2 or pattern == pattern3:
+        
+        notas_de_corretagem.columns = ['Q Negociação',
+                 'Compra/Venda',
+                 'Tipo mercado',
+                 'Prazo',
+                 'Especificação do título',
+                 'Obs. (*)',
+                 'Quantidade',
+                 'Preço / Ajuste',
+                 'Valor Operação / Ajuste',
+                 'D/C']
+        
+        return notas_de_corretagem
+        
+    
 def treat(notas_de_corretagem, tables1):
         #Treat the pdf data
         
-        #Making the first row the header
-        notas_de_corretagem.columns = notas_de_corretagem.loc[0]
-
-        #Excluding the first row (now it is the header) and reseting the index
-        notas_de_corretagem = notas_de_corretagem.iloc[1:,:]
+        #Find pattern
+        notas_de_corretagem = id_patterns(notas_de_corretagem)
 
         #Excluding useless columns
         notas_de_corretagem.drop(columns = ['Prazo','Obs. (*)'], inplace = True)
-        
-        #Adjusting columns names
-        coln_rep = {'C/V Tipo mercado':'Compra/Venda','':'Tipo mercado'}
-        notas_de_corretagem.rename(columns = coln_rep, inplace = True)
-        
+
+
         #format values and data types
-        
-        
         df_date = tables1[0].df
         dt_string = df_date.iloc[2,2]
-        date_datetime  = datetime.strptime(dt_string, "%m/%d/%Y")
+        date_datetime  = datetime.strptime(dt_string, "%d/%m/%Y")
         notas_de_corretagem['Data Pregao'] = date_datetime
-        
-        notas_de_corretagem['Compra/Venda'] = notas_de_corretagem['Compra/Venda'].replace({'C':'Compra', 'V':'Venda'}).copy()
-        notas_de_corretagem['D/C'] = notas_de_corretagem['D/C'].replace({'D':'Debito', 'C':'Credito'}).copy()
-                
+        notas_de_corretagem['D/C'] = notas_de_corretagem['D/C'].replace({'D':'Debito', 'C':'Credito'}).copy()                
         notas_de_corretagem['Preço / Ajuste'] = notas_de_corretagem['Preço / Ajuste'].map(parse_num)
         notas_de_corretagem['Valor Operação / Ajuste'] = notas_de_corretagem['Valor Operação / Ajuste'].map(parse_num)
         notas_de_corretagem['Quantidade'] = notas_de_corretagem['Quantidade'].astype(int)
@@ -87,7 +132,6 @@ def etl(path):
     notas_path = [os.path.join(path, file) for file in arquivos_path if 'NotaNegociacao' in file]
     
     for path_pdf in notas_path:
-        
         #Extract data from pdf
         notas_de_corretagem, tables1 = extract(path_pdf)
         
@@ -99,4 +143,4 @@ def etl(path):
         
     return pd.concat(df)
 
-etl(path)
+df = etl(path)
