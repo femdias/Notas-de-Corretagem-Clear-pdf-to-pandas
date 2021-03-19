@@ -14,7 +14,7 @@ from os import listdir
 import pikepdf
 import numpy as np
 
-path  = "/home/fm/Documents/GitHub/em_desenvolvimento/Notas-de-Corretagem-Clear-pdf-to-pandas"
+path  = os.path.join(os.getcwd(), r'repos')
 
 def refactor_pdf(path_pdf):
         modified_pdf_name = os.path.basename(path_pdf).split('.')
@@ -130,7 +130,7 @@ def ets(path):
     
     arquivos_path = listdir(path)
     
-    #filter files that contain the string "NotaCorretagem" in filename
+    #all the file in this folder should be a "NotaCorretagem" file
     notas_path = [os.path.join(path, file) for file in arquivos_path if 'NotaNegociacao' in file and False==file.endswith('_resaved.pdf')]
     
     for path_pdf in notas_path:
@@ -164,7 +164,7 @@ def calculate_results(df):
         df_.loc[r.index,'Value_acum'] = r['Value'].cumsum()
     
     cols = ['Especificação do título', 'Data Pregao',
-           'Compra/Venda', 'D/C', 'Códigos Papel',
+           'Compra/Venda', 'D/C','Códigos Papel',
            'Value_acum']
     
     df_2 = df_[cols].groupby('Especificação do título').max()
@@ -174,3 +174,4 @@ def calculate_results(df):
 
 df_results = calculate_results(df)
 
+df_results.to_excel('df_results.xlsx',encoding='utf-8',index=True)
