@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
 import re
-import df_negociation as dfn
-import df_taxas as dftx
-import pdf_to_text as ptt
+
+from utils import pdf_to_text, df_taxas, df_negociation
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
 
