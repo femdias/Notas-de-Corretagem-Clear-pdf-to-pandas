@@ -51,3 +51,4 @@ traitlets==5.0.5
 wcwidth==0.2.5
 xlrd==0.7.1
 xlwt==0.7.2
+pdfplumber
