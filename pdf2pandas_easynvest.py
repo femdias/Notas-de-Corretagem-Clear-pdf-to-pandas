@@ -21,7 +21,7 @@ import numpy as np
 
 
 # Path where the pdf files are located
-path  = "C:/Users/leona/Documents/Arquivos/Projetos/NotasCorretagem/Easynvest"
+path  = "C:/Users/leona/Downloads/Notas_Luca"
 
 def refactor_pdf(path_pdf):
         modified_pdf_name = os.path.basename(path_pdf).split('.')
@@ -182,4 +182,5 @@ def calculate_results(df):
     return df_2
 
 df_results = calculate_results(df)
+
 
