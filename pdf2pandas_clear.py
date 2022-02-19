@@ -14,7 +14,7 @@ from os import listdir
 import pikepdf
 import numpy as np
 
-path  = os.path.join(os.getcwd(), r'repos')
+path  = os.path.join(os.getcwd(), './notas')
 
 def refactor_pdf(path_pdf):
         modified_pdf_name = os.path.basename(path_pdf).split('.')
@@ -120,7 +120,14 @@ def treat(notas_de_corretagem, tables1):
         notas_de_corretagem['Preço / Ajuste'] = notas_de_corretagem['Preço / Ajuste'].map(parse_num)
         notas_de_corretagem['Valor Operação / Ajuste'] = notas_de_corretagem['Valor Operação / Ajuste'].map(parse_num)
         notas_de_corretagem['Quantidade'] = notas_de_corretagem['Quantidade'].astype(int)
-        notas_de_corretagem[['Especificação do título', 'Códigos Papel']] = notas_de_corretagem['Especificação do título'].str.split('          ', expand = True)
+
+        # Esse padrão não funciona mais, agora na descrição vem uma string onde esse espaço aparece duas vezes e isso estava
+        # Gerando um erro, é necessário tratar manualmente
+        # notas_de_corretagem[['Especificação do título', 'Códigos Papel']] = notas_de_corretagem['Especificação do título'].str.split('          ', expand = True)
+        a = notas_de_corretagem['Especificação do título'].str.split('          ', expand = True)
+        notas_de_corretagem['Especificação do título'] = a[0]
+        notas_de_corretagem['Códigos Papel'] = a[1]
+        
         
         return notas_de_corretagem
     
@@ -141,6 +148,9 @@ def ets(path):
         path_pdf
         #Extract data from pdf
         notas_de_corretagem, tables1 = extract(path_pdf)
+
+        print(notas_de_corretagem)
+        print(tables1)
         
         #Format extracted data        
         notas_de_corretagem = treat(notas_de_corretagem, tables1)
@@ -182,3 +192,5 @@ df_results = calculate_results(df)
 df_results.Value_acum.sum()
 
 df_results.to_excel('df_results.xlsx',encoding='utf-8',index=True)
+
+print(df_results)
